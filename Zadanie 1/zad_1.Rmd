@@ -1,0 +1,86 @@
+---
+title: "Zadanie 1"
+author: "Szymon Janowski"
+date: "31 10 2020"
+output: html_document
+---
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE, error = FALSE
+)
+```
+
+## Wczytanie danych z cache'owaniem
+Do cache'owania wykorzystany zosta&#322; parametr *cache* ustawiony na warto&#347;&#263; *TRUE* w bloku kodu.
+
+```{r loading_data, cache=TRUE}
+library(EDAWR)
+library(dplyr)
+library(knitr)
+
+# Number of tuberculosis cases
+knitr::kable(head(tb))
+```
+
+## Prezentacja podsumowania danych w zbiorze
+
+```{r summary}
+knitr::kable(summary(tb))
+```
+
+## Prezentacja liczby zachorowa&#324; z podzia&#322;em na p&#322;e&#263;
+
+```{r groupby}
+df_gsex <- tb %>%
+  group_by(sex) %>%
+  summarise_at(vars(child, adult, elderly), funs(sum), na.rm=TRUE)
+df_gsex$sum <- rowSums(df_gsex[,c("child", "adult", "elderly")])
+knitr::kable(df_gsex[, c("sex","sum")])
+  
+```
+
+## Prezentacja danych dla dzieci, doros&#322;ych i os&#243;b starszych w kolejnych latach
+
+```{r groupby2}
+df_gyear <- tb %>%
+  group_by(year) %>%
+  summarise_at(vars(child, adult, elderly), funs(sum), na.rm=TRUE)
+matplot(df_gyear$year, df_gyear[,c("child", "adult", "elderly")], type = c("b"), pch=1, col = 1:3, xlab="Year", ylab="Number of cases")
+legend("topleft", legend = cbind("child", "adult", "elderly"), col=1:3, pch=1)
+```
+
+## Prezentacja wykres&#243;w zachorowa&#324; w kolejnych latach dla poszczeg&#243;lnych kraj&#243;w
+
+```{r groupby3}
+df_gcountry_year <- tb %>%
+  group_by(country, year) %>%
+  summarise_at(vars(child, adult, elderly), funs(sum), na.rm=TRUE)
+df_gcountry_year$sum <- rowSums(df_gcountry_year[,c("child", "adult", "elderly")])
+
+# All countries
+countries <- unique(df_gcountry_year$country)
+length(countries)
+
+```
+```{r groupby4}
+color=1
+for(i in countries){
+  df_temp <- df_gcountry_year %>%
+    filter(country == i) %>%
+    select(c("country", "year", "sum"))
+  matplot(df_temp$year, df_temp[,c('sum')], type = c("b"), pch=1, col = color, xlab="Year", ylab="Number of cases", ylim = c(0,max(df_gcountry_year$sum)))
+  par(new=TRUE)
+  color = color+1
+}
+```
+
+#### Uwaga kompilowane z u&#380;yciem polecenia
+Nie u&#380;ywanie przycisku *Knit* w RStudio pozwala na unikni&#281;cie bl&#281;d&#243;w cache'owania pierwszego bloku.
+Renderowa&#263; raport mo&#380;na z pomoc&#261; poni&#380;szej komendy.
+
+```{r rendering, eval=FALSE}
+rmarkdown::render('zad_1.Rmd', output_format = 'html_document')
+# or
+rmarkdown::render('zad_1.Rmd', output_format = 'md_document')
+```
