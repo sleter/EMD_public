@@ -1,0 +1,90 @@
+---
+title: "Zadanie 2"
+author: "Szymon Janowski"
+date: "3 11 2020"
+output: html_document
+---
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE, error = FALSE
+)
+```
+
+## Wczytanie danych
+
+```{r loading_data}
+library(ggplot2)
+library(knitr)
+library(cowplot)
+
+data(diamonds)
+knitr::kable(summary(diamonds))
+```
+
+## Histogram dla zmiennej `depth`
+
+```{r histogram}
+ggplot(data=diamonds) + geom_histogram(aes(x=depth)) + ggtitle("Depth variable histogram") + xlab("Depth") + ylab("Frequency")
+```
+
+## Ustawienie szerokoci kube&#322;ka histogramu na warto&#347;&#263; *0.2*
+
+```{r histogram2}
+ggplot(data=diamonds) + geom_histogram(binwidth=0.2, aes(x=depth)) + ggtitle("Depth variable histogram (edited binwidth)") + xlab("Depth") + ylab("Frequency")
+```
+
+## Ograniczenie osi *x* do przedzia&#322;u *[55, 70]*
+
+```{r histogram3}
+ggplot(data=diamonds) + geom_histogram(binwidth=0.2, aes(x=depth)) + ggtitle("Depth variable histogram (edited xlim)") + xlab("Depth") + ylab("Frequency") + xlim(55, 70)
+```
+
+## Jak zmienna `cut` wp&#322;ywa na histogram
+#### a) w wykorzystaniem koloru
+
+```{r histogram4_1, fig.width=15, fig.height=8}
+h4_1 <- ggplot(diamonds, aes(factor(cut), depth, fill=cut)) + geom_boxplot() + ggtitle("Depth variable distribution by `cut`") + xlab("Cut") + ylab("Depth")
+# or
+h4_2 <- ggplot(diamonds, aes(x=depth, fill=cut)) + geom_histogram(binwidth=0.2, alpha=0.2, position="identity")  + ggtitle("") + xlab("Depth") + ylab("Frequency") + xlim(55, 70)
+plot_grid(h4_1, h4_2)
+```
+
+#### b) z wykorzystaniem paneli
+
+```{r histogram4_2, fig.width=15, fig.height=8}
+ggplot(data=diamonds) + geom_histogram(binwidth=0.2, aes(x=depth)) + ggtitle("Depth variable histogram by `cut`") + xlab("Depth") + ylab("Frequency") + facet_wrap(~cut)
+```
+
+## Powt&#243;rzenie wcze&#347;niejszych krok&#243;w dla zmiennej `price`
+
+```{r histogram5, fig.width=12, fig.height=5}
+h1 <- ggplot(data=diamonds) + geom_histogram(aes(x=price)) + ggtitle("Price variable histogram") + xlab("Price") + ylab("Frequency")
+
+h2 <- ggplot(data=diamonds) + geom_histogram(binwidth=150, aes(x=price)) + ggtitle("Price variable histogram (edited binwidth)") + xlab("Price") + ylab("Frequency")
+
+h3 <- ggplot(data=diamonds) + geom_histogram(binwidth=150, aes(x=price)) + ggtitle("Price variable histogram (edited xlim)") + xlab("Price") + ylab("Frequency") + xlim(0, 10000)
+
+# h4 <- ggplot(diamonds, aes(x=price, fill=cut)) + geom_histogram(alpha=0.2, position="identity") + ggtitle("Price variable distribution by `cut`") + xlab("Cut") + ylab("Price")
+h4 <- ggplot(diamonds, aes(x=price, fill=cut)) + geom_histogram(binwidth=150, alpha=0.2, position="identity")  + ggtitle("Price variable distribution by `cut`") + xlab("Price") + ylab("Frequency") + xlim(0, 10000)
+
+h5 <- ggplot(data=diamonds) + geom_histogram(binwidth=150, aes(x=price)) + ggtitle("Price variable histogram by `cut`") + xlab("Price") + ylab("Frequency") + facet_wrap(~cut, ncol = 5)
+
+# Display
+plot_grid(h1,h2,h3,h4, labels=c("H1", "H2", "H3", "H4"), ncol=2, nrow=2)
+plot_grid(h5, labels=c("H5"))
+```
+
+## Wizualizacja relacji mi&#281;dzy zmiennymi `carat` i `price`
+```{r plot, fig.width=12, fig.height=5}
+set.seed(42)
+dsamp <- diamonds[sample(nrow(diamonds), 10000),]
+p <- ggplot(dsamp, aes(carat, price, color=price)) + geom_jitter(alpha=0.1) + ggtitle("Price of a diamond based on the carat of a unit") + xlab("Carat") + ylab("Price") + geom_smooth(method='loess', size=0.5, se=TRUE, fill="#ffaa80", colour="#ff5500", alpha=0.1)
+
+
+bdiamonds <- transform(diamonds, group_out=cut(carat, breaks=c(-Inf,1.5, 2.5, 3.5, 4.5, Inf), labels=c("<1.5", "1.5-2.5", "2.5-3.5", "3.5-4.5", ">4.5")))
+p2 <- ggplot(bdiamonds, aes(factor(group_out), price, fill=group_out)) + geom_boxplot() + ggtitle("Price distribution for carats") + xlab("Carat") + ylab("Price")
+
+plot_grid(p, p2, labels=c("P1", "P2"))
+
+```
