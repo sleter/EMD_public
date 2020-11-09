@@ -44,9 +44,10 @@ ggplot(data=diamonds) + geom_histogram(binwidth=0.2, aes(x=depth)) + ggtitle("De
 #### a) w wykorzystaniem koloru
 
 ```{r histogram4_1, fig.width=15, fig.height=8}
-h4_1 <- ggplot(diamonds, aes(factor(cut), depth, fill=cut)) + geom_boxplot() + ggtitle("Depth variable distribution by `cut`") + xlab("Cut") + ylab("Depth")
-# or
-h4_2 <- ggplot(diamonds, aes(x=depth, fill=cut)) + geom_histogram(binwidth=0.2, alpha=0.2, position="identity")  + ggtitle("") + xlab("Depth") + ylab("Frequency") + xlim(55, 70)
+h4_1 <- ggplot(diamonds, aes(x=depth, fill=cut)) + geom_histogram(binwidth=0.2, alpha=0.2, position="identity") + ggtitle("Depth variable distribution by `cut`") + xlab("Depth") + ylab("Frequency") + xlim(55, 70)
+# alternative solution with boxplot
+h4_2 <- ggplot(diamonds, aes(factor(cut), depth, fill=cut)) + geom_boxplot() + ggtitle("Alternative boxplot solution") + xlab("Cut") + ylab("Depth")
+
 plot_grid(h4_1, h4_2)
 ```
 

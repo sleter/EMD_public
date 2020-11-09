@@ -160,9 +160,10 @@ Jak zmienna `cut` wpływa na histogram
 
 #### a) w wykorzystaniem koloru
 
-    h4_1 <- ggplot(diamonds, aes(factor(cut), depth, fill=cut)) + geom_boxplot() + ggtitle("Depth variable distribution by `cut`") + xlab("Cut") + ylab("Depth")
-    # or
-    h4_2 <- ggplot(diamonds, aes(x=depth, fill=cut)) + geom_histogram(binwidth=0.2, alpha=0.2, position="identity")  + ggtitle("") + xlab("Depth") + ylab("Frequency") + xlim(55, 70)
+    h4_1 <- ggplot(diamonds, aes(x=depth, fill=cut)) + geom_histogram(binwidth=0.2, alpha=0.2, position="identity") + ggtitle("Depth variable distribution by `cut`") + xlab("Depth") + ylab("Frequency") + xlim(55, 70)
+    # alternative solution with boxplot
+    h4_2 <- ggplot(diamonds, aes(factor(cut), depth, fill=cut)) + geom_boxplot() + ggtitle("Alternative boxplot solution") + xlab("Cut") + ylab("Depth")
+
     plot_grid(h4_1, h4_2)
 
 ![](zad_2_files/figure-markdown_strict/histogram4_1-1.png)
