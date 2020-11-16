@@ -1,0 +1,227 @@
+---
+title: "Zadanie 2"
+author: "Szymon Janowski"
+date: "16 11 2020"
+output: html_document
+---
+
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE, error = FALSE
+)
+```
+
+# Cz&#281;&#347;&#263; 1
+
+### Wczytanie danych
+
+```{r loading_data}
+library(modeldata)
+library(caret)
+library(cowplot)
+
+data(mlc_churn)
+churnData <- data.frame(mlc_churn)
+knitr::kable(summary(churnData))
+```
+
+### Podzia&#322; na zbi&#243;r treningowy i testowy
+
+```{r train_test_split}
+set.seed(42)
+inTraining <- createDataPartition(
+  y = churnData$churn,
+  p = .7,
+  list = FALSE)
+
+
+trainChurnData <- churnData[inTraining,]
+testChurnData <- churnData[-inTraining,]
+
+print(nrow(trainChurnData))
+print(nrow(testChurnData))
+```
+
+### Test algorytm&#243;w klasyfikacyjnych
+
+Pierwotnie w treningu nie wykorzytane zosta&#322;y &#380;adne metody *resmaplingu*.
+```{r train_control}
+# Defining train control
+ctrl <- trainControl(
+  method = "cv",
+  number = 2)
+```
+
+```{r train}
+# Training
+set.seed(42)
+
+# Adaboost
+model_ab <- train(
+  churn ~ .,
+  data = trainChurnData,
+  method = "adaboost",
+  trControl = ctrl)
+
+# XGBoost
+model_xgb <- train(
+  churn ~ .,
+  data = trainChurnData,
+  method = "xgbTree",
+  trControl = ctrl)
+
+```
+
+
+Ewaluacja modeli bez *preprocessingu* i przeszukiwania przestrzeni hiperparametr&#243;w.
+```{r evaluation}
+# Evaluation with confusion matrix for Adaboost
+rfClasses <- predict(model_ab, newdata = testChurnData)
+confusionMatrix(data = rfClasses, testChurnData$churn)
+
+# Evaluation with confusion matrix for XGBoost
+rfClasses <- predict(model_xgb, newdata = testChurnData)
+confusionMatrix(data = rfClasses, testChurnData$churn)
+```
+Czy warto wst&#281;pnie przetworzy&#263; dane?
+
+Tak, uwa&#380;am, &#380;e zawsze warto wst&#281;pnie przetworzy&#263; dane. Wiele algorytm&#243;w znacznie zyskuje na normalizacji danych, wybraniu istotnych cech (*feature selection*) czy dodaniu nowych cech (*feature engeneering*). Dodatkowo tzreba te&#380; zadba&#263; o interpretacj&#281; warto&#347;ci niezdefiniowanych czy atrybuty kategorialne.
+
+Przyk&#322;ad wst&#281;pnego przetworzenia danych, kt&#243;re pomog&#322;o poprawi&#263; wyniki jest poni&#380;ej. Warto wspomnie&#263;, &#380;e prawdopodobnie bardziej imponuj&#261;ce rezultaty mo&#380;naby uzyska&#263; np. dla algorytm&#243;w mocno wra&#380;liwych na normalizacj&#281;.
+
+```{r preprocessing}
+# Training
+set.seed(42)
+
+model_pre <- train(
+  churn ~ .,
+  data = trainChurnData,
+  method = "adaboost",
+  trControl = ctrl,
+  # Preprocessing
+  preProc = c("center", "scale", "nzv"))
+
+# Evaluating
+rfClasses <- predict(model_pre, newdata = testChurnData)
+confusionMatrix(data = rfClasses, testChurnData$churn)
+
+```
+
+### Przeszukiwanie przestrzeni parametr&#243;w
+
+W ostatnim w tej cz&#281;&#347;ci fragmencie kodu pokazane jest strojenie hiperparametr&#243;w.
+
+```{r hiperparameters}
+set.seed(42)
+
+# Adaboost
+adaGrid <- expand.grid(
+  nIter = c(50, 500),
+  method = c("Adaboost.M1", "Real adaboost")
+)
+
+gridCtrl <- trainControl(
+  method = "repeatedcv",
+  number = 2,
+  repeats = 5,
+  summaryFunction = twoClassSummary,
+  classProbs = TRUE
+)
+
+model_ada <- train(
+  churn ~ .,
+  data = trainChurnData,
+  method = "adaboost",
+  metric = "ROC",
+  trControl = gridCtrl,
+  tuneGrid = adaGrid,
+  preProc = c("center", "scale", "nzv"))
+
+print(model_ada)
+
+# ----------------------------------------------
+# XGBoost
+xgbGrid <- expand.grid(
+  nrounds = c(50, 500),
+  max_depth = c(4, 6),
+  eta = c(.2, .3, .4),
+  gamma = 5,
+  colsample_bytree = .5,
+  min_child_weight = 10,
+  subsample = .5
+)
+
+model_xgb <- train(
+  churn ~ .,
+  data = trainChurnData,
+  method = "xgbTree",
+  metric = "ROC",
+  trControl = gridCtrl,
+  tuneGrid = xgbGrid,
+  preProc = c("center", "scale", "nzv"))
+
+print(model_xgb)
+```
+
+### Por&#243;wnanie wybranych algorytm&#243;w za pomoc&#261; wykres&#243;w
+
+```{r comparison1, fig.width=10, fig.height=15}
+set.seed(42)
+
+resamps <- resamples(list(ADA = model_ada,
+                          XGB = model_xgb))
+
+# Plot 1
+theme1 <- trellis.par.get()
+theme1$plot.symbol$col = rgb(.2, .2, .2, .4)
+theme1$plot.symbol$pch = 16
+theme1$plot.line$col = rgb(1, 0, 0, .7)
+theme1$plot.line$lwd <- 2
+trellis.par.set(theme1)
+plot1 <- bwplot(resamps, layout = c(3, 1))
+
+# Plot 2
+trellis.par.set(caretTheme())
+plot2 <- dotplot(resamps, metric = "ROC")
+
+# Plot3
+plot3 <- splom(resamps)
+
+plot_grid(plot1, plot2, plot3, labels=c("P1", "P2", "P3"), ncol=1, nrow=3)
+```
+
+```{r comparison2, fig.width=10, fig.height=10}
+
+# Differences between models
+difValues <- diff(resamps)
+
+# Plot 1
+trellis.par.set(theme1)
+plot1 <- bwplot(difValues, layout = c(3, 1))
+
+# Plot 2
+trellis.par.set(caretTheme())
+plot2 <- dotplot(difValues)
+
+plot_grid(plot1, plot2, labels=c("P1", "P2"), ncol=1, nrow=2)
+```
+
+# Cz&#281;&#347;&#263; 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
