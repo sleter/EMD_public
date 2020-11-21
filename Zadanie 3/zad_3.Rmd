@@ -45,7 +45,7 @@ print(nrow(testChurnData))
 
 ### Test algorytm&#243;w klasyfikacyjnych
 
-Pierwotnie w treningu nie wykorzytane zosta&#322;y &#380;adne metody *resmaplingu*.
+W treningu wykorzytana zosta&#322;a metoda *resmaplingu* - *Cross-validation* z parametrem dw&#243;ch fold&#243;w. W eksperymencie por&#243;wnano metody *Adaboost* i *XGBoost*, obie bazuj&#261;ce na koncepcie drzew decyzyjnych.
 ```{r train_control}
 # Defining train control
 ctrl <- trainControl(
@@ -74,7 +74,7 @@ model_xgb <- train(
 ```
 
 
-Ewaluacja modeli bez *preprocessingu* i przeszukiwania przestrzeni hiperparametr&#243;w.
+Poni&#380;ej wida&#263; ewaluacj&#281; modeli bez *preprocessingu* i przeszukiwania przestrzeni hiperparametr&#243;w z wykorzystaniem macierzy pomy&#322;ek i dodatkowych statystyk. W rezultacie algorytm *Adaboost* uzyska&#322; wy&#380;sz&#261 trafno&#347;&#263;. *Adaboost* lepiej te&#380; radzi sobie chocia&#380;by z klasyfikacj&#261; klasy mniejszo&#347;ciowej.
 ```{r evaluation}
 # Evaluation with confusion matrix for Adaboost
 rfClasses <- predict(model_ab, newdata = testChurnData)
@@ -86,7 +86,7 @@ confusionMatrix(data = rfClasses, testChurnData$churn)
 ```
 Czy warto wst&#281;pnie przetworzy&#263; dane?
 
-Tak, uwa&#380;am, &#380;e zawsze warto wst&#281;pnie przetworzy&#263; dane. Wiele algorytm&#243;w znacznie zyskuje na normalizacji danych, wybraniu istotnych cech (*feature selection*) czy dodaniu nowych cech (*feature engeneering*). Dodatkowo tzreba te&#380; zadba&#263; o interpretacj&#281; warto&#347;ci niezdefiniowanych czy atrybuty kategorialne.
+Tak, uwa&#380;am, &#380;e zawsze warto wst&#281;pnie przetworzy&#263; dane. Wiele algorytm&#243;w znacznie zyskuje na normalizacji danych, wybraniu istotnych cech (*feature selection*) czy dodaniu nowych cech (*feature engeneering*). Dodatkowo trzeba te&#380; zadba&#263; o interpretacj&#281; warto&#347;ci niezdefiniowanych czy atrybuty kategorialne.
 
 Przyk&#322;ad wst&#281;pnego przetworzenia danych, kt&#243;re pomog&#322;o poprawi&#263; wyniki jest poni&#380;ej. Warto wspomnie&#263;, &#380;e prawdopodobnie bardziej imponuj&#261;ce rezultaty mo&#380;naby uzyska&#263; np. dla algorytm&#243;w mocno wra&#380;liwych na normalizacj&#281;.
 
@@ -111,6 +111,10 @@ confusionMatrix(data = rfClasses, testChurnData$churn)
 ### Przeszukiwanie przestrzeni parametr&#243;w
 
 W ostatnim w tej cz&#281;&#347;ci fragmencie kodu pokazane jest strojenie hiperparametr&#243;w.
+
+Dla algorytmu *AdaBoost* strojony jest parametr *nIter*, kt&#243;ry odpowiada za liczb&#281; operacji boostowania. Drugim strojonym parametrem jest metoda/implementacja wykorzystywanego modelu *Adaboost*.
+
+Dla algorytmu *XGBoost* strojone s&#261; parametry *nrounds*, *max_depth* i *eta*. Kolejno oznaczaj&#261; one: liczba rund w kt&#243;rych trenowane s&#261; kolejne iteracje drzew decyzyjnych, maksymaln&#261; g&#322;&#281;boko&#347;&#263; drzewa i parametr bli&#378;niaczy do *learning rate* i pozwalaj&#261;cy unikn&#261;&#263; przetrenowania.
 
 ```{r hiperparameters}
 set.seed(42)
@@ -166,7 +170,7 @@ print(model_xgb)
 
 ### Por&#243;wnanie wybranych algorytm&#243;w za pomoc&#261; wykres&#243;w
 
-```{r comparison1, fig.width=10, fig.height=15}
+```{r comparison1, fig.width=10, fig.height=112}
 set.seed(42)
 
 resamps <- resamples(list(ADA = model_ada,
@@ -209,9 +213,83 @@ plot_grid(plot1, plot2, labels=c("P1", "P2"), ncol=1, nrow=2)
 
 # Cz&#281;&#347;&#263; 2
 
+### &#321;adowanie danych
+```{r loading_data2}
+library(ggplot2)
+library(dplyr)
+
+data(diamonds)
+diamonds <- data.frame(diamonds)
+knitr::kable(summary(diamonds))
+```
+
+### Podzia&#322; na zbi&#243;r treningowy i testowy
+
+```{r train_test_split}
+set.seed(42)
+inTraining <- createDataPartition(
+  y = diamonds$price,
+  p = .7,
+  list = FALSE)
 
 
+d_train <- diamonds[inTraining,]
+d_test <- diamonds[-inTraining,]
 
+head(d_train)
+```
+
+### Regresja
+
+```{r regresja}
+set.seed(42)
+
+ctrl <- trainControl(method = "repeatedcv",   
+                     number = 10,
+                     repeats = 5)
+
+model <- train(price ~ .,
+               data = d_train,
+               method = "lm",
+               trControl = ctrl,
+               preProcess = c('scale', 'center'))
+model
+
+summary(model)
+```
+### Predykcja
+```{r regresja2}
+x_test <- diamonds[, names(diamonds) != 'price']
+y_test <- diamonds$price
+
+predictions <- predict(model, x_test)
+
+RMSE(predictions, y_test)
+```
+
+### Wp&#322;yw r&#243;&#380;nych zmiennych na cen&#281; diamentu
+
+```{r regresja, fig.height=5, fig.width=12}
+set.seed(42)
+
+theme1 <- trellis.par.get()
+theme1$plot.symbol$col = rgb(.2, .2, .2, .4)
+theme1$plot.symbol$pch = 16
+theme1$plot.line$col = rgb(1, 0, 0, .7)
+theme1$plot.line$lwd <- 2
+trellis.par.set(theme1)
+
+# Select smaller sample
+diamonds <- sample_n(diamonds, 500)
+
+featurePlot(x = diamonds[, c("carat", "depth", "table", "x", "y", "z")],
+            y = diamonds$price,
+            plot = "scatter",
+            type = c("p", "smooth"),
+            span = .5,
+            layout = c(6, 1))
+
+```
 
 
 
