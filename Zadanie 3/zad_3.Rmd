@@ -28,7 +28,7 @@ knitr::kable(summary(churnData))
 
 ### Podzia&#322; na zbi&#243;r treningowy i testowy
 
-```{r train_test_split}
+```{r train_test_split2}
 set.seed(42)
 inTraining <- createDataPartition(
   y = churnData$churn,
@@ -269,7 +269,7 @@ RMSE(predictions, y_test)
 
 ### Wp&#322;yw r&#243;&#380;nych zmiennych na cen&#281; diamentu
 
-```{r regresja, fig.height=5, fig.width=12}
+```{r regresja3, fig.height=5, fig.width=12}
 set.seed(42)
 
 theme1 <- trellis.par.get()
@@ -290,9 +290,6 @@ featurePlot(x = diamonds[, c("carat", "depth", "table", "x", "y", "z")],
             layout = c(6, 1))
 
 ```
-
-
-
 
 
 
