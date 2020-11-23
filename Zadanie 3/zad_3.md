@@ -275,9 +275,9 @@ z parametrem dwóch foldów. W eksperymencie porównano metody *Adaboost* i
 
 Poniżej widać ewaluację modeli bez *preprocessingu* i przeszukiwania
 przestrzeni hiperparametrów z wykorzystaniem macierzy pomyłek i
-dodatkowych statystyk. W rezultacie algorytm *Adaboost* uzyskał
-wyższ&\#261 trafność. *Adaboost* lepiej też radzi sobie chociażby z
-klasyfikacją klasy mniejszościowej.
+dodatkowych statystyk. W rezultacie algorytm *Adaboost* uzyskał wyższą
+trafność. *Adaboost* lepiej też radzi sobie chociażby z klasyfikacją
+klasy mniejszościowej.
 
     # Evaluation with confusion matrix for Adaboost
     rfClasses <- predict(model_ab, newdata = testChurnData)
@@ -343,7 +343,7 @@ klasyfikacją klasy mniejszościowej.
     ##        'Positive' Class : yes             
     ## 
 
-Czy warto wstępnie przetworzyć dane?
+### Czy warto wstępnie przetworzyć dane?
 
 Tak, uważam, że zawsze warto wstępnie przetworzyć dane. Wiele algorytmów
 znacznie zyskuje na normalizacji danych, wybraniu istotnych cech
@@ -544,7 +544,7 @@ bliźniaczy do *learning rate* i pozwalający uniknąć przetrenowania.
 
 ![](zad_3_files/figure-markdown_strict/comparison1-1.png)
 
-    # Differences between models
+    # Differences between models - przydatne przy porównywaniu wiekszej liczby modeli (wiecej niż 2)
     difValues <- diff(resamps)
 
     # Plot 1
@@ -566,17 +566,6 @@ Część 2
 
     library(ggplot2)
     library(dplyr)
-
-    ## 
-    ## Attaching package: 'dplyr'
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
 
     data(diamonds)
     diamonds <- data.frame(diamonds)

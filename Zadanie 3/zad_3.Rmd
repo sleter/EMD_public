@@ -74,7 +74,7 @@ model_xgb <- train(
 ```
 
 
-Poni&#380;ej wida&#263; ewaluacj&#281; modeli bez *preprocessingu* i przeszukiwania przestrzeni hiperparametr&#243;w z wykorzystaniem macierzy pomy&#322;ek i dodatkowych statystyk. W rezultacie algorytm *Adaboost* uzyska&#322; wy&#380;sz&#261 trafno&#347;&#263;. *Adaboost* lepiej te&#380; radzi sobie chocia&#380;by z klasyfikacj&#261; klasy mniejszo&#347;ciowej.
+Poni&#380;ej wida&#263; ewaluacj&#281; modeli bez *preprocessingu* i przeszukiwania przestrzeni hiperparametr&#243;w z wykorzystaniem macierzy pomy&#322;ek i dodatkowych statystyk. W rezultacie algorytm *Adaboost* uzyska&#322; wy&#380;sz&#261; trafno&#347;&#263;. *Adaboost* lepiej te&#380; radzi sobie chocia&#380;by z klasyfikacj&#261; klasy mniejszo&#347;ciowej.
 ```{r evaluation}
 # Evaluation with confusion matrix for Adaboost
 rfClasses <- predict(model_ab, newdata = testChurnData)
@@ -84,7 +84,7 @@ confusionMatrix(data = rfClasses, testChurnData$churn)
 rfClasses <- predict(model_xgb, newdata = testChurnData)
 confusionMatrix(data = rfClasses, testChurnData$churn)
 ```
-Czy warto wst&#281;pnie przetworzy&#263; dane?
+### Czy warto wst&#281;pnie przetworzy&#263; dane?
 
 Tak, uwa&#380;am, &#380;e zawsze warto wst&#281;pnie przetworzy&#263; dane. Wiele algorytm&#243;w znacznie zyskuje na normalizacji danych, wybraniu istotnych cech (*feature selection*) czy dodaniu nowych cech (*feature engeneering*). Dodatkowo trzeba te&#380; zadba&#263; o interpretacj&#281; warto&#347;ci niezdefiniowanych czy atrybuty kategorialne.
 
@@ -170,7 +170,7 @@ print(model_xgb)
 
 ### Por&#243;wnanie wybranych algorytm&#243;w za pomoc&#261; wykres&#243;w
 
-```{r comparison1, fig.width=10, fig.height=112}
+```{r comparison1, fig.width=10, fig.height=12}
 set.seed(42)
 
 resamps <- resamples(list(ADA = model_ada,
@@ -197,7 +197,7 @@ plot_grid(plot1, plot2, plot3, labels=c("P1", "P2", "P3"), ncol=1, nrow=3)
 
 ```{r comparison2, fig.width=10, fig.height=10}
 
-# Differences between models
+# Differences between models - przydatne przy porównywaniu wiekszej liczby modeli (wiecej niż 2)
 difValues <- diff(resamps)
 
 # Plot 1
