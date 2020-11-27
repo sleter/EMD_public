@@ -1,0 +1,108 @@
+---
+title: "Zadanie 4"
+author: "Szymon Janowski"
+date: "26 11 2020"
+output: html_document
+---
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE, error = FALSE
+)
+```
+
+# Wczytanie danych
+
+```{r loading_data}
+library(fpc)
+library(dplyr)
+library(aricode)
+library(factoextra)
+library(ggplot2)
+library(cowplot)
+
+set.seed(23)
+face <- rFace(1000, p=2, dMoNo=3)
+
+df = data.frame(x=face[,1], y=face[,2])
+labels = as.integer(attr(face,"grouping"))
+
+data_plot <- ggplot(df,aes(x,y)) +
+  geom_point(col="blue")
+
+df_temp <- df %>% cbind(labels)
+gold_standard <- ggplot(df_temp,aes(x,y)) +
+  geom_point(col=labels)
+
+plot_grid(data_plot, gold_standard, labels=c("P1", "P2"), ncol=2, nrow=1)
+```
+
+
+# Trening r&#243;&#380;nych algorytmów grupowania
+
+### `k` wybrane metodą *gap statistic* VS `K` wybrane na podstawie etykiet
+
+```{r algo_tests}
+# Według metody *gap statistic* najlepsze K = 4
+fviz_nbclust(df, kmeans, nstart = 25,  method = "gap_stat", nboot = 50)
+# Wybieramy jednak K zgodne z etykietami
+K = 6
+```
+### Algorytm k-średnich
+```{r algo_tests2}
+model_kmeans <- eclust(df, "kmeans", k = K, nstart = 25, graph = F)
+# Prediction
+
+# Model
+model_kmeans
+```
+### Algorytm k-medoidów
+```{r algo_tests3}
+model_pam <- eclust(df, "pam", k = K, graph = F)
+model_pam
+```
+### Algorytm AHC (Agglomerative Hierarchical Clustering)
+```{r algo_tests4}
+model_ahc <- eclust(df, "hclust", k = K, hc_metric = "euclidean", hc_method = "ward.D2", graph = F)
+model_ahc
+```
+### Algorytm DBSCAN (Density-Based Spatial Clustering and Application with Noise)
+```{r algo_tests5}
+model_dbscan <- fpc::dbscan(df, eps=0.8, MinPts=3)
+model_dbscan
+```
+
+# Ocena jako&#347;ci skupie&#324;
+
+### Porównanie z pomocą miary AMI (Adjusted Mutual Information)
+```{r eval}
+"AMI metric comaprison:"
+paste0("   - KMeans - ", AMI(model_kmeans$cluster, labels))
+paste0("   - KMedoids - ", AMI(model_pam$cluster, labels))
+paste0("   - AHC - ", AMI(model_ahc$cluster, labels))
+paste0("   - DBSCAN - ", AMI(model_dbscan$cluster, labels))
+```
+# Porównanie z pomocą macierzy pomyłek
+```{r eval2}
+"Confusion matrices comaprison:"
+cat("\n\t   - KMeans - ")
+table(labels, model_kmeans$cluster)
+cat("\n\t   - KMedoids - ")
+table(labels, model_pam$cluster)
+cat("\n\t   - AHC - ")
+table(labels, model_ahc$cluster)
+cat("\n\t   - DBSCAN - ")
+table(labels, model_dbscan$cluster)
+```
+# Porównanie z pomocą wizualizacji
+```{r eval3, fig.width=9, fig.height=8}
+plot_kmeans <- fviz_cluster(model_kmeans, df, stand=F, ellipse=F, show.clust.cent=F, geom="point", palette="jco", ggtheme= theme_classic()) +
+                labs(title="KMeans")
+plot_pam <- fviz_cluster(model_pam, df, stand=F, ellipse=F, show.clust.cent=F, geom="point", palette="jco", ggtheme= theme_classic()) +
+                labs(title="KMedoids")
+plot_ahc <- fviz_cluster(model_ahc, df, stand=F, ellipse=F, show.clust.cent=F, geom="point", palette="jco", ggtheme= theme_classic()) +
+                labs(title="AHC")
+plot_dbscan <- fviz_cluster(model_dbscan, df, stand=F, ellipse=F, show.clust.cent=F, geom="point", palette="jco", ggtheme= theme_classic()) +
+                labs(title="DBSCAN")
+plot_grid(plot_kmeans, plot_pam, plot_ahc, plot_dbscan, labels=c("P1", "P2", "P3", "P4"), ncol=2, nrow=2)
+```
