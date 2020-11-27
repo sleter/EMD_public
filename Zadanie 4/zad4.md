@@ -15,11 +15,13 @@ Wczytanie danych
     labels = as.integer(attr(face,"grouping"))
 
     data_plot <- ggplot(df,aes(x,y)) +
-      geom_point(col="blue")
+      geom_point(col="blue") +
+      theme_bw()
 
     df_temp <- df %>% cbind(labels)
     gold_standard <- ggplot(df_temp,aes(x,y)) +
-      geom_point(col=labels)
+      geom_point(col=labels) +
+      theme_bw()
 
     plot_grid(data_plot, gold_standard, labels=c("P1", "P2"), ncol=2, nrow=1)
 
@@ -39,15 +41,12 @@ Trening różnych algorytmów grupowania
 
 ![](zad4_files/figure-markdown_strict/algo_tests-1.png)
 
-    # Wybieramy jednak K zgodne z etykietami
-    K = 6
+    # Wybieramy jednak K zgodne z unikalną liczbą etykiet
+    K = length(unique(labels)) # 6
 
 ### Algorytm k-średnich
 
     model_kmeans <- eclust(df, "kmeans", k = K, nstart = 25, graph = F)
-    # Prediction
-
-    # Model
     model_kmeans
 
     ## K-means clustering with 6 clusters of sizes 93, 359, 4, 230, 114, 200
@@ -62,20 +61,34 @@ Trening różnych algorytmów grupowania
     ## 6  1.99777035 16.9699236
     ## 
     ## Clustering vector:
-    ##    [1] 1 2 1 1 2 1 4 4 2 4 2 1 1 1 2 2 1 1 4 1 1 1 2 2 1 2 1 4 4 2 1 1 1 1 1 2 1 4 4 2 2 4 1 1 2 2 2 1 1 2 1 2 1 2 4 4 1 4 1 4 1 1 1 1 2 1 4 4 1 4 1 2
-    ##   [73] 4 1 4 2 2 2 1 4 2 4 4 2 2 4 2 4 4 1 4 2 1 1 1 1 1 1 1 2 4 1 1 2 4 2 2 2 4 1 2 1 1 1 1 1 2 1 2 1 1 2 1 1 1 1 1 1 4 4 2 1 2 1 4 4 2 2 4 1 2 1 1 1
-    ##  [145] 1 4 2 1 1 2 1 1 4 2 4 1 4 2 1 2 1 1 2 1 4 2 1 2 1 1 4 1 1 2 1 4 1 1 1 2 4 4 2 4 2 2 1 2 1 1 1 1 4 2 2 4 2 4 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-    ##  [217] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-    ##  [289] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-    ##  [361] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-    ##  [433] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 4 5 4 4 4 4
-    ##  [505] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 4 4 4 4 4 4 4 4 4 4 4 4 4 5 4 4 4 4 4 4 5 4 4 4 5 4 4 4 4 5 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
-    ##  [577] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 4 4 4 4 4 4 4 4 4 4 4 5 4 4 4 4 4 4 4 4 4 4 4 4 4 5 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 4 4
-    ##  [649] 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 4 4 4 4 4 4 4 5 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 6 4 4 4 4 4 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
-    ##  [721] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
-    ##  [793] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
-    ##  [865] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
-    ##  [937] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 3 3 3 3
+    ##    [1] 1 2 1 1 2 1 4 4 2 4 2 1 1 1 2 2 1 1 4 1 1 1 2 2 1 2 1 4 4 2 1 1 1 1 1 2 1
+    ##   [38] 4 4 2 2 4 1 1 2 2 2 1 1 2 1 2 1 2 4 4 1 4 1 4 1 1 1 1 2 1 4 4 1 4 1 2 4 1
+    ##   [75] 4 2 2 2 1 4 2 4 4 2 2 4 2 4 4 1 4 2 1 1 1 1 1 1 1 2 4 1 1 2 4 2 2 2 4 1 2
+    ##  [112] 1 1 1 1 1 2 1 2 1 1 2 1 1 1 1 1 1 4 4 2 1 2 1 4 4 2 2 4 1 2 1 1 1 1 4 2 1
+    ##  [149] 1 2 1 1 4 2 4 1 4 2 1 2 1 1 2 1 4 2 1 2 1 1 4 1 1 2 1 4 1 1 1 2 4 4 2 4 2
+    ##  [186] 2 1 2 1 1 1 1 4 2 2 4 2 4 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [223] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [260] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [297] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [334] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [371] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [408] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [445] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [482] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 4 5 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
+    ##  [519] 4 4 4 4 5 4 4 4 4 4 4 4 4 4 4 4 4 4 5 4 4 4 4 4 4 5 4 4 4 5 4 4 4 4 5 4 4
+    ##  [556] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
+    ##  [593] 5 4 4 4 4 4 4 4 4 4 4 4 5 4 4 4 4 4 4 4 4 4 4 4 4 4 5 4 4 4 4 4 4 4 4 4 4
+    ##  [630] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 4 4 4
+    ##  [667] 4 4 4 4 5 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 6 4 4 4 4 4 6 6 6 6 6 6
+    ##  [704] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
+    ##  [741] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
+    ##  [778] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
+    ##  [815] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
+    ##  [852] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
+    ##  [889] 6 6 6 6 6 6 6 6 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
+    ##  [926] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
+    ##  [963] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 3 3 3
+    ## [1000] 3
     ## 
     ## Within cluster sum of squares by cluster:
     ## [1] 106.20932 374.29779  89.50000 762.03654 187.61306  65.52071
@@ -83,8 +96,9 @@ Trening różnych algorytmów grupowania
     ## 
     ## Available components:
     ## 
-    ##  [1] "cluster"      "centers"      "totss"        "withinss"     "tot.withinss" "betweenss"    "size"         "iter"         "ifault"      
-    ## [10] "silinfo"      "nbclust"      "data"
+    ##  [1] "cluster"      "centers"      "totss"        "withinss"     "tot.withinss"
+    ##  [6] "betweenss"    "size"         "iter"         "ifault"       "silinfo"     
+    ## [11] "nbclust"      "data"
 
 ### Algorytm k-medoidów
 
@@ -100,26 +114,42 @@ Trening różnych algorytmów grupowania
     ## [5,] 873  1.995332379 16.996319
     ## [6,] 902 -1.930762957 16.951077
     ## Clustering vector:
-    ##    [1] 1 2 1 2 2 1 3 3 2 3 4 2 1 1 2 2 1 1 4 1 1 1 2 2 1 2 1 4 4 2 1 1 1 1 1 2 1 4 4 2 2 4 1 1 2 2 4 1 1 2 1 2 1 2 4 3 2 4 1 4 1 1 1 1 4 1 4 4 1 3 1 2
-    ##   [73] 4 1 4 2 2 2 1 4 2 4 4 2 2 4 2 4 4 1 4 2 1 1 1 1 1 1 1 2 4 1 1 2 3 2 2 2 4 1 2 1 1 1 1 1 2 1 2 1 1 2 1 1 1 1 1 1 4 4 2 1 2 1 4 4 2 2 4 1 2 1 1 1
-    ##  [145] 1 3 2 1 1 2 1 1 4 2 3 1 4 2 1 2 1 1 2 1 3 2 1 2 1 1 3 1 1 2 1 3 2 1 1 2 4 4 4 4 2 2 1 2 1 1 1 1 4 2 2 4 2 3 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-    ##  [217] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-    ##  [289] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-    ##  [361] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-    ##  [433] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 4 3 4
-    ##  [505] 3 4 3 3 3 4 4 4 3 3 4 3 4 4 4 3 4 3 5 4 3 4 4 4 4 3 3 3 4 4 4 3 6 3 4 4 4 4 4 5 4 3 4 3 4 3 3 4 6 4 4 3 4 4 3 4 4 4 4 3 4 4 4 4 4 4 3 4 4 4 4 3
-    ##  [577] 4 4 4 3 3 4 3 4 4 4 4 4 3 3 4 3 6 4 4 4 4 3 4 4 4 3 4 4 6 3 4 4 4 4 4 4 4 3 3 3 4 4 5 4 4 4 3 4 3 3 3 3 4 4 3 4 4 4 4 3 4 4 4 4 3 4 3 4 4 6 4 4
-    ##  [649] 3 4 4 4 4 3 4 3 4 4 4 3 3 5 5 4 4 3 4 3 4 4 5 3 4 3 4 3 3 4 4 3 3 4 3 4 3 4 3 4 3 3 3 5 3 4 3 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
-    ##  [721] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
-    ##  [793] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
-    ##  [865] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
-    ##  [937] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 5 5 5
+    ##    [1] 1 2 1 2 2 1 3 3 2 3 4 2 1 1 2 2 1 1 4 1 1 1 2 2 1 2 1 4 4 2 1 1 1 1 1 2 1
+    ##   [38] 4 4 2 2 4 1 1 2 2 4 1 1 2 1 2 1 2 4 3 2 4 1 4 1 1 1 1 4 1 4 4 1 3 1 2 4 1
+    ##   [75] 4 2 2 2 1 4 2 4 4 2 2 4 2 4 4 1 4 2 1 1 1 1 1 1 1 2 4 1 1 2 3 2 2 2 4 1 2
+    ##  [112] 1 1 1 1 1 2 1 2 1 1 2 1 1 1 1 1 1 4 4 2 1 2 1 4 4 2 2 4 1 2 1 1 1 1 3 2 1
+    ##  [149] 1 2 1 1 4 2 3 1 4 2 1 2 1 1 2 1 3 2 1 2 1 1 3 1 1 2 1 3 2 1 1 2 4 4 4 4 2
+    ##  [186] 2 1 2 1 1 1 1 4 2 2 4 2 3 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [223] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [260] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [297] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [334] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [371] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [408] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [445] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+    ##  [482] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 4 3 4 3 4 3 3 3 4 4 4 3 3 4 3 4 4
+    ##  [519] 4 3 4 3 5 4 3 4 4 4 4 3 3 3 4 4 4 3 6 3 4 4 4 4 4 5 4 3 4 3 4 3 3 4 6 4 4
+    ##  [556] 3 4 4 3 4 4 4 4 3 4 4 4 4 4 4 3 4 4 4 4 3 4 4 4 3 3 4 3 4 4 4 4 4 3 3 4 3
+    ##  [593] 6 4 4 4 4 3 4 4 4 3 4 4 6 3 4 4 4 4 4 4 4 3 3 3 4 4 5 4 4 4 3 4 3 3 3 3 4
+    ##  [630] 4 3 4 4 4 4 3 4 4 4 4 3 4 3 4 4 6 4 4 3 4 4 4 4 3 4 3 4 4 4 3 3 5 5 4 4 3
+    ##  [667] 4 3 4 4 5 3 4 3 4 3 3 4 4 3 3 4 3 4 3 4 3 4 3 3 3 5 3 4 3 4 4 5 5 5 5 5 5
+    ##  [704] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
+    ##  [741] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
+    ##  [778] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
+    ##  [815] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
+    ##  [852] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
+    ##  [889] 5 5 5 5 5 5 5 5 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
+    ##  [926] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
+    ##  [963] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 5 5
+    ## [1000] 5
     ## Objective function:
     ##     build      swap 
     ## 0.8846034 0.8528677 
     ## 
     ## Available components:
-    ##  [1] "medoids"    "id.med"     "clustering" "objective"  "isolation"  "clusinfo"   "silinfo"    "diss"       "call"       "data"       "nbclust"
+    ##  [1] "medoids"    "id.med"     "clustering" "objective"  "isolation" 
+    ##  [6] "clusinfo"   "silinfo"    "diss"       "call"       "data"      
+    ## [11] "nbclust"
 
 ### Algorytm AHC (Agglomerative Hierarchical Clustering)
 
@@ -134,25 +164,28 @@ Trening różnych algorytmów grupowania
     ## Distance         : euclidean 
     ## Number of objects: 1000
 
-### Algorytm DBSCAN (Density-Based Spatial Clustering and Application with Noise)
+    fviz_dend(model_ahc, show_labels = F, palette = "jco", as.ggplot = T)
 
-    model_dbscan <- fpc::dbscan(df, eps=0.8, MinPts=3)
+![](zad4_files/figure-markdown_strict/algo_tests4-1.png) \#\#\# Algorytm
+DBSCAN (Density-Based Spatial Clustering and Application with Noise)
+
+    model_dbscan <- fpc::dbscan(df, eps=0.25, MinPts=4, scale=T)
     model_dbscan
 
-    ## dbscan Pts=1000 MinPts=3 eps=0.8
-    ##        0   1   2   3   4
-    ## border 5   0   0   0   0
-    ## seed   0 498 187 111 199
-    ## total  5 498 187 111 199
+    ## dbscan Pts=1000 MinPts=4 eps=0.25
+    ##        0   1   2   3  4   5   6
+    ## border 4   0   0   1  1   0   1
+    ## seed   0 199 299 187 10 199  99
+    ## total  4 199 299 188 11 199 100
 
 Ocena jakości skupień
 =====================
 
 ### Porównanie z pomocą miary AMI (Adjusted Mutual Information)
 
-    "AMI metric comaprison:"
+    "AMI metric comparison:"
 
-    ## [1] "AMI metric comaprison:"
+    ## [1] "AMI metric comparison:"
 
     paste0("   - KMeans - ", AMI(model_kmeans$cluster, labels))
 
@@ -168,81 +201,305 @@ Ocena jakości skupień
 
     paste0("   - DBSCAN - ", AMI(model_dbscan$cluster, labels))
 
-    ## [1] "   - DBSCAN - 0.763216702337863"
+    ## [1] "   - DBSCAN - 0.973736002519606"
 
-Porównanie z pomocą macierzy pomyłek
-====================================
+### Porównanie z pomocą macierzy pomyłek
 
-    "Confusion matrices comaprison:"
+    rc.names = c(1,2,3,4,5,6)
+    # Confusion matrices comaprison:
+    #   - KMeans -
+    knitr::kable(table(labels, model_kmeans$cluster), row.names=rc.names, col.names=rc.names)
 
-    ## [1] "Confusion matrices comaprison:"
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">3</th>
+<th style="text-align: right;">4</th>
+<th style="text-align: right;">5</th>
+<th style="text-align: right;">6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">93</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">299</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">184</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">199</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
 
-    cat("\n\t   - KMeans - ")
+    #    - KMedoids -
+    knitr::kable(table(labels, model_pam$cluster), row.names=rc.names, col.names=rc.names)
 
-    ## 
-    ##     - KMeans -
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">3</th>
+<th style="text-align: right;">4</th>
+<th style="text-align: right;">5</th>
+<th style="text-align: right;">6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">88</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">100</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">299</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">199</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
 
-    table(labels, model_kmeans$cluster)
+    #   - AHC -
+    knitr::kable(table(labels, model_ahc$cluster), row.names=rc.names, col.names=rc.names)
 
-    ##       
-    ## labels   1   2   3   4   5   6
-    ##      1  93  60   0  46   0   0
-    ##      2   0   0   0   0 100   0
-    ##      3   0 299   0   0   0   0
-    ##      4   0   0   0 184  14   1
-    ##      5   0   0   0   0   0 199
-    ##      6   0   0   4   0   0   0
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">3</th>
+<th style="text-align: right;">4</th>
+<th style="text-align: right;">5</th>
+<th style="text-align: right;">6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">84</td>
+<td style="text-align: right;">68</td>
+<td style="text-align: right;">47</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">299</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">188</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">199</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+</tr>
+</tbody>
+</table>
 
-    cat("\n\t   - KMedoids - ")
+    #   - DBSCAN -
+    knitr::kable(table(labels, model_dbscan$cluster)[, 2:7], row.names=rc.names, col.names=rc.names)
 
-    ## 
-    ##     - KMedoids -
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">3</th>
+<th style="text-align: right;">4</th>
+<th style="text-align: right;">5</th>
+<th style="text-align: right;">6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">199</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">100</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">299</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">188</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">199</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
 
-    table(labels, model_pam$cluster)
-
-    ##       
-    ## labels   1   2   3   4   5   6
-    ##      1  88  61  12  38   0   0
-    ##      2   0   0   0   0   0 100
-    ##      3   0 299   0   0   0   0
-    ##      4   0   0  70 117   7   5
-    ##      5   0   0   0   0 199   0
-    ##      6   0   0   0   0   3   1
-
-    cat("\n\t   - AHC - ")
-
-    ## 
-    ##     - AHC -
-
-    table(labels, model_ahc$cluster)
-
-    ##       
-    ## labels   1   2   3   4   5   6
-    ##      1  84  68  47   0   0   0
-    ##      2   0   0   0   0 100   0
-    ##      3   0 299   0   0   0   0
-    ##      4   0   0 188  11   0   0
-    ##      5   0   0   0 199   0   0
-    ##      6   0   0   0   0   0   4
-
-    cat("\n\t   - DBSCAN - ")
-
-    ## 
-    ##     - DBSCAN -
-
-    table(labels, model_dbscan$cluster)
-
-    ##       
-    ## labels   0   1   2   3   4
-    ##      1   0 199   0   0   0
-    ##      2   0   0   0 100   0
-    ##      3   0 299   0   0   0
-    ##      4   1   0 187  11   0
-    ##      5   0   0   0   0 199
-    ##      6   4   0   0   0   0
-
-Porównanie z pomocą wizualizacji
-================================
+### Porównanie z pomocą wizualizacji
 
     plot_kmeans <- fviz_cluster(model_kmeans, df, stand=F, ellipse=F, show.clust.cent=F, geom="point", palette="jco", ggtheme= theme_classic()) +
                     labs(title="KMeans")
