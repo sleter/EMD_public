@@ -1,10 +1,19 @@
 library(shiny)
+library(shinyBS)
+library(plotly)
 library(shinyWidgets)
+library(shinydashboard)
+library(shinydashboardPlus)
 
 shinyUI(fluidPage(
     titlePanel("Pokedex in R"),
     
     setBackgroundImage(src = "https://images8.alphacoders.com/963/963319.png"),
+    
+    tags$style(type="text/css",
+               ".shiny-output-error { visibility: hidden; }",
+               ".shiny-output-error:before { visibility: hidden; }"
+    ),
     
     tabsetPanel(
         tabPanel("Load data",
@@ -25,18 +34,57 @@ shinyUI(fluidPage(
                  
                  sidebarLayout(
                      sidebarPanel(
-                         selectizeInput('poke1', 'Pokemon 1', choices = NULL, selected=NULL, options = list(maxOptions = 5)),
-                         selectizeInput('poke2', 'Pokemon 2', choices = NULL, selected=NULL, options = list(maxOptions = 5)),
+                         uiOutput("pokes_to_compare"),
                          br(),
-                         br(), 
+                         uiOutput("select_stats"),
+                         br(),
                          submitButton("Compare")
+                         
                      ),
                      mainPanel(
-                         plotOutput("comparisonPlot")
+                         plotlyOutput("comparisonPlot")
+                         # plotOutput("comparisonPlot")
                      )
                  )
                  
                  ),
-        tabPanel("Choose the best pokemon set")
+        tabPanel("Choose the best pokemon set",
+                 
+                 sidebarLayout(
+                     sidebarPanel(
+                         # uiOutput("pokemon_type"),
+                         # submitButton("Select type"),
+                         width = 3,
+                         uiOutput("select_poke"),
+                         hr(),
+                         # Boost by input
+                         submitButton("Submit")
+                     ),
+                     mainPanel(
+                         fluidRow(
+                             column(8, "Plots",
+                                    # bsCollapse("coll1", open = "Stat summary plot", plotlyOutput("plot1"))
+                                    bsCollapse(id="coll1", open = "Stat summary plot",
+                                               bsCollapsePanel("Summary plot", "", plotlyOutput("plot1"), style = "success"),
+                                               bsCollapsePanel("Idividual pokemon stats arrangement", "", plotlyOutput("plot2"), style = "success")
+                                               
+                                               ),
+                                          
+                                    ),
+                             column(4, "Additional stats",
+                                    h4("Pokemon types"),
+                                    textOutput("stats1"),
+                                    h4("Next evolution"),
+                                    textOutput("stats2"),
+                                    h4("Same type boost"),
+                                    textOutput("stats3"),
+                                    
+                             )
+                         )
+                     )
+                 )
+                 
+                 
+                 )
     ),
 ))
